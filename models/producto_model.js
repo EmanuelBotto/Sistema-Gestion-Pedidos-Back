@@ -1,10 +1,6 @@
-// models/producto.model.js
-
 import pool from "../config/bd.js";
 
-
 const ProductoModel = {
-  // Obtener todos los productos
   async getAll() {
     const { rows } = await pool.query(
       'SELECT * FROM producto ORDER BY id ASC'
@@ -12,7 +8,6 @@ const ProductoModel = {
     return rows;
   },
 
-  // Obtener un producto por ID
   async getById(id) {
     const { rows } = await pool.query(
       'SELECT * FROM producto WHERE id = $1',
@@ -21,7 +16,6 @@ const ProductoModel = {
     return rows[0] || null;
   },
 
-  // Crear un nuevo producto
   async create({ nombre, descripcion, precio, estado }) {
     const { rows } = await pool.query(
       `INSERT INTO producto (nombre, descripcion, precio, estado)
@@ -32,7 +26,6 @@ const ProductoModel = {
     return rows[0];
   },
 
-  // Actualizar un producto existente
   async update(id, { nombre, descripcion, precio, estado }) {
     const { rows } = await pool.query(
       `UPDATE producto
@@ -44,7 +37,6 @@ const ProductoModel = {
     return rows[0] || null;
   },
 
-  // Eliminar un producto
   async delete(id) {
     const { rows } = await pool.query(
       'DELETE FROM producto WHERE id = $1 RETURNING *',
@@ -54,4 +46,4 @@ const ProductoModel = {
   },
 };
 
-module.exports = ProductoModel;
+export default ProductoModel;

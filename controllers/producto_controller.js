@@ -1,11 +1,9 @@
-import pool from "../config/bd.js";
-
+import ProductoModel from "../models/producto_model.js";
 
 const ProductoController = {
-  // GET /productos
   async getAll(req, res) {
     try {
-      const productos = await pool.getAll();
+      const productos = await ProductoModel.getAll();
       res.json({ ok: true, data: productos });
     } catch (error) {
       console.error('Error al obtener productos:', error);
@@ -13,16 +11,13 @@ const ProductoController = {
     }
   },
 
-  // GET /productos/:id
   async getById(req, res) {
     try {
       const { id } = req.params;
-      const producto = await pool.getById(id);
-
+      const producto = await ProductoModel.getById(id);
       if (!producto) {
         return res.status(404).json({ ok: false, message: 'Producto no encontrado' });
       }
-
       res.json({ ok: true, data: producto });
     } catch (error) {
       console.error('Error al obtener producto:', error);
@@ -30,12 +25,9 @@ const ProductoController = {
     }
   },
 
-  // POST /productos
   async create(req, res) {
     try {
       const { nombre, descripcion, precio, estado } = req.body;
-
-      // Validaciones básicas
       if (!nombre || nombre.trim() === '') {
         return res.status(400).json({ ok: false, message: 'El campo "nombre" es requerido' });
       }
@@ -45,8 +37,7 @@ const ProductoController = {
       if (isNaN(precio) || Number(precio) < 0) {
         return res.status(400).json({ ok: false, message: 'El "precio" debe ser un número positivo' });
       }
-
-      const nuevo = await pool.create({ nombre, descripcion, precio, estado });
+      const nuevo = await ProductoModel.create({ nombre, descripcion, precio, estado });
       res.status(201).json({ ok: true, data: nuevo });
     } catch (error) {
       console.error('Error al crear producto:', error);
@@ -54,13 +45,10 @@ const ProductoController = {
     }
   },
 
-  // PUT /productos/:id
   async update(req, res) {
     try {
       const { id } = req.params;
       const { nombre, descripcion, precio, estado } = req.body;
-
-      // Validaciones básicas
       if (!nombre || nombre.trim() === '') {
         return res.status(400).json({ ok: false, message: 'El campo "nombre" es requerido' });
       }
@@ -70,13 +58,10 @@ const ProductoController = {
       if (isNaN(precio) || Number(precio) < 0) {
         return res.status(400).json({ ok: false, message: 'El "precio" debe ser un número positivo' });
       }
-
-      const actualizado = await pool.update(id, { nombre, descripcion, precio, estado });
-
+      const actualizado = await ProductoModel.update(id, { nombre, descripcion, precio, estado });
       if (!actualizado) {
         return res.status(404).json({ ok: false, message: 'Producto no encontrado' });
       }
-
       res.json({ ok: true, data: actualizado });
     } catch (error) {
       console.error('Error al actualizar producto:', error);
@@ -84,16 +69,13 @@ const ProductoController = {
     }
   },
 
-  // DELETE /productos/:id
   async delete(req, res) {
     try {
       const { id } = req.params;
-      const eliminado = await pool.delete(id);
-
+      const eliminado = await ProductoModel.delete(id);
       if (!eliminado) {
         return res.status(404).json({ ok: false, message: 'Producto no encontrado' });
       }
-
       res.json({ ok: true, message: 'Producto eliminado correctamente', data: eliminado });
     } catch (error) {
       console.error('Error al eliminar producto:', error);
@@ -102,4 +84,4 @@ const ProductoController = {
   },
 };
 
-module.exports = ProductoController;
+export default ProductoController;
