@@ -21,7 +21,7 @@ const obtenerUsuario = async (req, res) => {
     }
 };
 
-const createUsuario = async (req, res) => {
+const crearUsuario = async (req, res) => {
     try {
         const { nombre, apellido, mail, contrasenia, rol, id } = req.body;
 

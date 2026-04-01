@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import productoRoutes from "./routes/producto_routes.js";
+import usuarioRoutes from "./routes/usuarioRoutes.js";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/api/productos", productoRoutes);
+app.use("api/usuarios", usuarioRoutes);
 
 export default app;
