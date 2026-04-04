@@ -63,3 +63,5 @@ const DetallePedidoController = {
         }
     },
 };
+
+export default DetallePedidoController;
