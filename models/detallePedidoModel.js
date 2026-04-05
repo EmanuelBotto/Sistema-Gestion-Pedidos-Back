@@ -20,7 +20,7 @@ const DetallePedidoModel = {
         const { rows } = await pool.query(
             `INSERT INTO detalle_pedido (cantidad, precio_unitario, pedido, producto) 
             VALUES ($1, $2, $3, $4)
-            RETURNING *`
+            RETURNING *`,
             [cantidad, precio_unitario, pedido, producto]
         );
         return rows[0];
@@ -32,18 +32,18 @@ const DetallePedidoModel = {
             SET cantidad = $1, precio_unitario = $2, pedido = $3, producto = $4
             WHERE id = $5
             RETURNING *`,
-            [cantidad, precio_unitario, pedido, producto]
+            [cantidad, precio_unitario, pedido, producto, id]
         );
         return rows[0] || null;
     },
 
-     async delete(id) {
+    async delete(id) {
         const { rows } = await pool.query(
-            'DELETE FROM producto WHERE id = $1 RETURNING *',
+            'DELETE FROM detalle_pedido WHERE id = $1 RETURNING *',
             [id]
         );
-    return rows[0] || null;
-  },
+        return rows[0] || null;
+    },
 };
 
-export default DetallePedido;
+export default DetallePedidoModel;

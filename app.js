@@ -22,14 +22,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/api/productos", productoRoutes);
-<<<<<<< HEAD
 app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/movimientos-stock", movimientoStockRoutes);
 app.use("/api/usuarios", usuarioRoutes);
-=======
-app.use("api/usuarios", usuarioRoutes);
-app.use("api/cliente", clienteRoutes);
-app.use("api/detallePedido", detallePedidoRoutes);
->>>>>>> 02fd3e02c8b6ec1f18f6b3b092173a81827ed4d6
+app.use("/api/cliente", clienteRoutes);
+app.use("/api/detallePedido", detallePedidoRoutes);
 
 export default app;

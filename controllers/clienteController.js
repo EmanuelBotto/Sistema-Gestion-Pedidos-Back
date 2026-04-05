@@ -64,3 +64,5 @@ const actualizarCliente = async (req, res) => {
         res.status(500).json({ error: "Error al actualizar Cliente" });
     }
 };
+
+export { listarCliente, obtenerCliente, crearCliente, eliminarCliente, actualizarCliente };

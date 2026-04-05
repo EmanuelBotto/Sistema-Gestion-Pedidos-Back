@@ -63,3 +63,5 @@ const actualizarUsuario = async (req, res) => {
         res.status(500).json({ error: "Error al actualizar usuario" });
     }
 };
+
+export { listarUsuario, obtenerUsuario, crearUsuario, eliminarUsuario, actualizarUsuario };
