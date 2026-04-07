@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import * as Usuario from "../models/usuario.js";
 
 const listarUsuario = async (req, res) => {
@@ -22,22 +23,25 @@ const obtenerUsuario = async (req, res) => {
 };
 
 const crearUsuario = async (req, res) => {
-    try {
-        const { nombre, apellido, mail, contrasenia, rol, id } = req.body;
+    const { nombre, apellido, mail, contrasenia, rol } = req.body;
 
-        if (
-            !nombre || 
-            !apellido || 
-            !mail ||
-            !contrasenia ||
-            !rol ||
-            !id
-        ) {
-            return res.status(400).json({ error: "nombre, apellido, mail, contraseña, rol e id son obligatorios" });
-        }
-    } catch (error ) {
-        console.log("ERROR REAL:", error);
-        res.status(400).json({ error: "Error al crear usuario" });
+    try {
+        const hashedPassword = await bcrypt.hash(contrasenia, 10);
+
+        // ✅ Se llama al modelo en lugar de llamarse a sí misma recursivamente
+        const usuario = await Usuario.createUsuario(
+            nombre,
+            apellido,
+            mail,
+            hashedPassword,
+            rol
+        );
+
+        res.status(201).json(usuario);
+
+    } catch (error) {
+        console.error("ERROR REAL:", error);
+        res.status(500).json({ error: "Error al crear usuario" });
     }
 };
 
@@ -48,18 +52,22 @@ const eliminarUsuario = async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error("ERROR REAL:", error);
-        res.status(500).json({ error: "Error al eliminar usuario "});
+        res.status(500).json({ error: "Error al eliminar usuario" });
     }
 };
 
 const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, mail, contrasenia, rol} = req.body;
-        const usuarioActualizado = await Usuario.updateUsuario(id, nombre, apellido, mail, contrasenia, rol);
+        const { nombre, apellido, mail, contrasenia, rol } = req.body;
+
+        // ✅ Se hashea la contraseña antes de actualizar
+        const hashedPassword = await bcrypt.hash(contrasenia, 10);
+
+        const usuarioActualizado = await Usuario.updateUsuario(id, nombre, apellido, mail, hashedPassword, rol);
         res.json(usuarioActualizado);
     } catch (error) {
-        console.log("ERROR REAL:", error);
+        console.error("ERROR REAL:", error);
         res.status(500).json({ error: "Error al actualizar usuario" });
     }
 };
