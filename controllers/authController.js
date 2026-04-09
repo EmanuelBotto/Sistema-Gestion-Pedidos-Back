@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { getUsuarioByMail } from "../models/usuario.js";
+import { getUsuarioByMail, getUsuarioByMailConCliente } from "../models/usuario.js";
 
 export const login = async (req, res) => {
     const { mail, contrasenia } = req.body;
@@ -42,11 +42,11 @@ export const login = async (req, res) => {
         );
 
         const usuarioSeguro = {
-            id: usuario.id,
-            nombre: usuario.nombre,
+            id:       usuario.id,
+            nombre:   usuario.nombre,
             apellido: usuario.apellido,
-            mail: usuario.mail,
-            rol: usuario.rol,
+            mail:     usuario.mail,
+            rol:      usuario.rol,
         };
 
         res.json({ token, usuario: usuarioSeguro });
@@ -54,5 +54,39 @@ export const login = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error en login" });
+    }
+};
+
+// ── /ME ──────────────────────────────────────────────────────────────────────
+// Devuelve los datos del usuario autenticado.
+// Si el rol es "cliente", incluye también el objeto `cliente` con los datos
+// de la tabla cliente vinculada mediante cliente_id.
+export const me = async (req, res) => {
+    try {
+        // req.usuario lo inyecta el middleware de autenticación (JWT decode)
+        const { rol, mail } = req.usuario;
+
+        let usuario;
+
+        if (rol === "cliente") {
+            // JOIN con tabla cliente para traer nombre, telefono, empresa, etc.
+            usuario = await getUsuarioByMailConCliente(mail);
+        } else {
+            const raw = await getUsuarioByMail(mail);
+            if (raw) {
+                const { contrasenia: _, ...rest } = raw;
+                usuario = rest;
+            }
+        }
+
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        res.json({ usuario });
+
+    } catch (error) {
+        console.error("ERROR REAL:", error);
+        res.status(500).json({ error: "Error al obtener sesión" });
     }
 };
