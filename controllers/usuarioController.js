@@ -3,7 +3,7 @@ import * as Usuario from "../models/usuario.js";
 
 const listarUsuario = async (req, res) => {
     try {
-        const usuarios = await Usuario.getUsuario();
+        const usuarios = await Usuario.getUsuarios();
         res.json(usuarios);
     } catch (error) {
         console.error("ERROR REAL:", error);

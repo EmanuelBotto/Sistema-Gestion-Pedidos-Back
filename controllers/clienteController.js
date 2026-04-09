@@ -23,22 +23,21 @@ const obtenerCliente = async (req, res) => {
 
 const crearCliente = async (req, res) => {
     try {
-        const { nombre, mail, telefono, direccion, empresa, pedidos, id } = req.body;
+        const { nombre, mail, telefono, direccion, empresa } = req.body;
 
         if (
             !nombre || 
             !mail || 
             !telefono ||
-            !direccion ||
-            !empresa ||
-            !pedidos ||
-            !id
+            !direccion
         ) {
-            return res.status(400).json({ error: "nombre, mail, telefono, direccion, empresa, pedidos e id son obligatorios" });
+            return res.status(400).json({ error: "nombre, mail, telefono y direccion son obligatorios" });
         }
+        const cliente = await ClienteModel.createCliente(nombre, mail, telefono, direccion, empresa);
+        res.status(201).json(cliente);
     } catch (error ) {
         console.log("ERROR REAL:", error);
-        res.status(400).json({ error: "Error al crear Cliente" });
+        res.status(500).json({ error: "Error al crear Cliente" });
     }
 };
 
@@ -56,8 +55,8 @@ const eliminarCliente = async (req, res) => {
 const actualizarCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, mail, telefono, direccion, empresa, pedidos} = req.body;
-        const ClienteActualizado = await ClienteModel.updateCliente(id, nombre, mail, telefono, direccion, empresa, pedidos);
+        const { nombre, mail, telefono, direccion, empresa } = req.body;
+        const ClienteActualizado = await ClienteModel.updateCliente(id, nombre, mail, telefono, direccion, empresa);
         res.json(ClienteActualizado);
     } catch (error) {
         console.log("ERROR REAL:", error);
