@@ -1,4 +1,5 @@
 import MovimientoStockModel from "../models/movimiento_stock_model.js";
+import { getUsuarioById, getUsuarioByMail, getUsuarioByNombre } from "../models/usuario.js";
 
 const MovimientoStockController = {
   async getAll(req, res) {
@@ -32,7 +33,29 @@ const MovimientoStockController = {
       if (!cantidad || cantidad <= 0) return res.status(400).json({ ok: false, message: '"cantidad" debe ser mayor a 0' });
       if (!usuario_realizo_movimiento) return res.status(400).json({ ok: false, message: 'El campo "usuario_realizo_movimiento" es requerido' });
 
-      const nuevo = await MovimientoStockModel.create({ producto_id, tipo, cantidad, usuario_realizo_movimiento });
+      let usuarioId = null;
+      const valorUsuario = String(usuario_realizo_movimiento).trim();
+
+      // Permite enviar id, mail o nombre desde el frontend y lo normaliza a id.
+      if (/^\d+$/.test(valorUsuario)) {
+        const usuario = await getUsuarioById(Number(valorUsuario));
+        if (usuario) usuarioId = usuario.id;
+      } else if (valorUsuario.includes("@")) {
+        const usuario = await getUsuarioByMail(valorUsuario);
+        if (usuario) usuarioId = usuario.id;
+      } else {
+        const usuario = await getUsuarioByNombre(valorUsuario);
+        if (usuario) usuarioId = usuario.id;
+      }
+
+      if (!usuarioId) {
+        return res.status(400).json({
+          ok: false,
+          message: 'Usuario no válido. Enviá id, mail o nombre existente en "usuario_realizo_movimiento"',
+        });
+      }
+
+      const nuevo = await MovimientoStockModel.create({ producto_id, tipo, cantidad, usuario_realizo_movimiento: usuarioId });
       res.status(201).json({ ok: true, data: nuevo });
     } catch (error) {
       console.error('Error al crear movimiento:', error);

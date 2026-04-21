@@ -37,6 +37,15 @@ export const getUsuarioByMail = async (mail) => {
     return resultado.rows[0];
 };
 
+// Obtener por nombre (para relacionar movimientos de stock)
+export const getUsuarioByNombre = async (nombre) => {
+    const resultado = await pool.query(
+        "SELECT * FROM usuario WHERE LOWER(nombre) = LOWER($1) LIMIT 1",
+        [nombre]
+    );
+    return resultado.rows[0];
+};
+
 // Actualizar
 export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol) => {
     const resultado = await pool.query(
