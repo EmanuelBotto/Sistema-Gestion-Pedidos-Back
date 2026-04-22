@@ -28,7 +28,7 @@ export const getUsuarioById = async (id) => {
     return resultado.rows[0];
 };
 
-// 🔑 Obtener por mail (para login)
+// Obtener por mail (para login y roles no-cliente)
 export const getUsuarioByMail = async (mail) => {
     const resultado = await pool.query(
         "SELECT * FROM usuario WHERE mail = $1",
@@ -50,10 +50,10 @@ export const getUsuarioByNombre = async (nombre) => {
 export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol) => {
     const resultado = await pool.query(
         `UPDATE usuario
-         SET nombre = $1, apellido = $2, mail = $3, contrasenia = $4, rol = $5
-         WHERE id = $6
+         SET nombre = $1, apellido = $2, mail = $3, contrasenia = $4, rol = $5, cliente_id = $6
+         WHERE id = $7
          RETURNING *`,
-        [nombre, apellido, mail, contrasenia, rol, id]
+        [nombre, apellido, mail, contrasenia, rol, cliente_id, id]
     );
     return resultado.rows[0];
 };
