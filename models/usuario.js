@@ -46,37 +46,8 @@ export const getUsuarioByNombre = async (nombre) => {
     return resultado.rows[0];
 };
 
-// Obtener por mail con JOIN a cliente (para /me cuando el rol es "cliente")
-// Devuelve el usuario sin contrasenia + objeto `cliente` anidado
-export const getUsuarioByMailConCliente = async (mail) => {
-    const resultado = await pool.query(
-        `SELECT
-            u.id,
-            u.nombre,
-            u.apellido,
-            u.mail,
-            u.rol,
-            u.cliente_id,
-            CASE WHEN c.id IS NOT NULL THEN
-                json_build_object(
-                    'id',        c.id,
-                    'nombre',    c.nombre,
-                    'mail',      c.mail,
-                    'telefono',  c.telefono,
-                    'direccion', c.direccion,
-                    'empresa',   c.empresa
-                )
-            ELSE NULL END AS cliente
-         FROM usuario u
-         LEFT JOIN cliente c ON c.id = u.cliente_id
-         WHERE u.mail = $1`,
-        [mail]
-    );
-    return resultado.rows[0] ?? null;
-};
-
-// Actualizar (incluyendo cliente_id opcional)
-export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol, cliente_id = null) => {
+// Actualizar
+export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol) => {
     const resultado = await pool.query(
         `UPDATE usuario
          SET nombre = $1, apellido = $2, mail = $3, contrasenia = $4, rol = $5, cliente_id = $6
