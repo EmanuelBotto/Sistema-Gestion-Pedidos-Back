@@ -37,17 +37,37 @@ export const getUsuarioByMail = async (mail) => {
     return resultado.rows[0];
 };
 
-// Obtener por nombre (para relacionar movimientos de stock)
-export const getUsuarioByNombre = async (nombre) => {
+// Obtener por mail con JOIN a cliente (para /me cuando el rol es "cliente")
+// Devuelve el usuario sin contrasenia + objeto `cliente` anidado
+export const getUsuarioByMailConCliente = async (mail) => {
     const resultado = await pool.query(
-        "SELECT * FROM usuario WHERE LOWER(nombre) = LOWER($1) LIMIT 1",
-        [nombre]
+        `SELECT
+            u.id,
+            u.nombre,
+            u.apellido,
+            u.mail,
+            u.rol,
+            u.cliente_id,
+            CASE WHEN c.id IS NOT NULL THEN
+                json_build_object(
+                    'id',        c.id,
+                    'nombre',    c.nombre,
+                    'mail',      c.mail,
+                    'telefono',  c.telefono,
+                    'direccion', c.direccion,
+                    'empresa',   c.empresa
+                )
+            ELSE NULL END AS cliente
+         FROM usuario u
+         LEFT JOIN cliente c ON c.id = u.cliente_id
+         WHERE u.mail = $1`,
+        [mail]
     );
-    return resultado.rows[0];
+    return resultado.rows[0] ?? null;
 };
 
-// Actualizar
-export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol) => {
+// Actualizar (incluyendo cliente_id opcional)
+export const updateUsuario = async (id, nombre, apellido, mail, contrasenia, rol, cliente_id = null) => {
     const resultado = await pool.query(
         `UPDATE usuario
          SET nombre = $1, apellido = $2, mail = $3, contrasenia = $4, rol = $5, cliente_id = $6
@@ -65,3 +85,6 @@ export const deleteUsuario = async (id) => {
         [id]
     );
 };
+
+
+
