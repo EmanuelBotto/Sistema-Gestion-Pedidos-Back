@@ -19,7 +19,6 @@ export const login = async (req, res) => {
         const hash = usuario.contrasenia || "";
         let passwordValida = false;
 
-        // Soporta hash bcrypt y, temporalmente, contraseñas legacy en texto plano.
         if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
             passwordValida = await bcrypt.compare(contrasenia, hash);
         } else {
@@ -35,18 +34,26 @@ export const login = async (req, res) => {
             return res.status(500).json({ error: "Configuración incompleta del servidor (JWT_SECRET)" });
         }
 
+        // ✅ Se incluye mail y cliente_id en el token para que los controllers
+        //    puedan filtrar por cliente sin hacer una consulta extra
         const token = jwt.sign(
-            { id: usuario.id, rol: usuario.rol },
+            {
+                id:         usuario.id,
+                rol:        usuario.rol,
+                mail:       usuario.mail,
+                cliente_id: usuario.cliente_id ?? null,
+            },
             process.env.JWT_SECRET,
             { expiresIn: "8h" }
         );
 
         const usuarioSeguro = {
-            id:       usuario.id,
-            nombre:   usuario.nombre,
-            apellido: usuario.apellido,
-            mail:     usuario.mail,
-            rol:      usuario.rol,
+            id:         usuario.id,
+            nombre:     usuario.nombre,
+            apellido:   usuario.apellido,
+            mail:       usuario.mail,
+            rol:        usuario.rol,
+            cliente_id: usuario.cliente_id ?? null,
         };
 
         res.json({ token, usuario: usuarioSeguro });
@@ -58,18 +65,14 @@ export const login = async (req, res) => {
 };
 
 // ── /ME ──────────────────────────────────────────────────────────────────────
-// Devuelve los datos del usuario autenticado.
-// Si el rol es "cliente", incluye también el objeto `cliente` con los datos
-// de la tabla cliente vinculada mediante cliente_id.
+// Si el rol es "cliente" devuelve también los datos de la tabla cliente
 export const me = async (req, res) => {
     try {
-        // req.usuario lo inyecta el middleware de autenticación (JWT decode)
         const { rol, mail } = req.usuario;
 
         let usuario;
 
         if (rol === "cliente") {
-            // JOIN con tabla cliente para traer nombre, telefono, empresa, etc.
             usuario = await getUsuarioByMailConCliente(mail);
         } else {
             const raw = await getUsuarioByMail(mail);

@@ -16,23 +16,23 @@ const DetallePedidoModel = {
         return rows[0] || null;
     },
 
-    async create({ cantidad, precio_unitario, pedido, producto }) {
+    async create({ cantidad, precio_unitario, pedido_id, producto_id }) {
         const { rows } = await pool.query(
-            `INSERT INTO detalle_pedido (cantidad, precio_unitario, pedido, producto) 
+            `INSERT INTO detalle_pedido (cantidad, precio_unitario, pedido_id, producto_id) 
             VALUES ($1, $2, $3, $4)
             RETURNING *`,
-            [cantidad, precio_unitario, pedido, producto]
+            [cantidad, precio_unitario, pedido_id, producto_id]
         );
         return rows[0];
     },
 
-    async update(id, { cantidad, precio_unitario, pedido, producto }) {
+    async update(id, { cantidad, precio_unitario, pedido_id, producto_id }) {
         const { rows } = await pool.query(
             `UPDATE detalle_pedido
-            SET cantidad = $1, precio_unitario = $2, pedido = $3, producto = $4
+            SET cantidad = $1, precio_unitario = $2, pedido_id = $3, producto_id = $4
             WHERE id = $5
             RETURNING *`,
-            [cantidad, precio_unitario, pedido, producto, id]
+            [cantidad, precio_unitario, pedido_id, producto_id, id]
         );
         return rows[0] || null;
     },

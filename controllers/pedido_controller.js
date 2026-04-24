@@ -1,14 +1,25 @@
 import PedidoModel from "../models/pedido_model.js";
+import { getClienteByMail } from "../models/clienteModel.js";
+
+const resolveClienteId = async (usuario) => {
+  const clienteIdFromToken = usuario?.cliente_id;
+  if (clienteIdFromToken != null && String(clienteIdFromToken).trim() !== "") {
+    return clienteIdFromToken;
+  }
+  if (!usuario?.mail) return null;
+  const cliente = await getClienteByMail(usuario.mail);
+  return cliente?.id ?? null;
+};
 
 const PedidoController = {
   async getAll(req, res) {
     try {
-      const { rol, cliente_id } = req.usuario ?? {};
+      const rol = String(req.usuario?.rol || "").toLowerCase();
 
       // Si es cliente, solo devuelve sus propios pedidos
       // Si es empleado o admin, devuelve todos
       const pedidos = rol === "cliente"
-        ? await PedidoModel.getByClienteId(cliente_id)
+        ? await PedidoModel.getByClienteId(await resolveClienteId(req.usuario))
         : await PedidoModel.getAll();
 
       res.json({ ok: true, data: pedidos });
@@ -25,7 +36,8 @@ const PedidoController = {
       if (!pedido) return res.status(404).json({ ok: false, message: "Pedido no encontrado" });
 
       // Un cliente solo puede ver sus propios pedidos
-      const { rol, cliente_id } = req.usuario ?? {};
+      const rol = String(req.usuario?.rol || "").toLowerCase();
+      const cliente_id = await resolveClienteId(req.usuario);
       if (rol === "cliente" && String(pedido.cliente_id) !== String(cliente_id)) {
         return res.status(403).json({ ok: false, message: "Acceso denegado" });
       }
@@ -39,12 +51,12 @@ const PedidoController = {
 
   async create(req, res) {
     try {
-      const { rol, cliente_id: clienteIdToken } = req.usuario ?? {};
+      const rol = String(req.usuario?.rol || "").toLowerCase();
 
       // Si es cliente, el cliente_id viene del token (no del body)
       // Si es admin/empleado, puede especificarlo en el body
       const cliente_id = rol === "cliente"
-        ? clienteIdToken
+        ? await resolveClienteId(req.usuario)
         : req.body.cliente_id;
 
       if (!cliente_id) {
