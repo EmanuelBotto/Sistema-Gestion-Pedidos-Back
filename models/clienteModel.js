@@ -10,6 +10,14 @@ export const getClienteById = async (id) => {
     return rows[0];
 };
 
+export const getClienteByMail = async (mail) => {
+    const { rows } = await pool.query(
+        "SELECT * FROM cliente WHERE LOWER(mail) = LOWER($1) LIMIT 1",
+        [mail]
+    );
+    return rows[0] ?? null;
+};
+
 export const createCliente = async (nombre, mail, telefono, direccion, empresa) => {
     const { rows } = await pool.query(
         `INSERT INTO cliente (nombre, mail, telefono, direccion, empresa)

@@ -27,7 +27,9 @@ const DetallePedidoController = {
 
     async create(req, res) {
         try {
-            const { cantidad, precio_unitario, pedido, producto } = req.body;
+            const { cantidad, precio_unitario } = req.body;
+            const pedido_id = req.body.pedido_id ?? req.body.pedido;
+            const producto_id = req.body.producto_id ?? req.body.producto;
             if (!cantidad || cantidad <= 0) {
                 return res.status(400).json({ ok: false, message: 'El campo "cantidad" debe ser mayor a 0' });
             }
@@ -37,10 +39,10 @@ const DetallePedidoController = {
             if (isNaN(precio_unitario) || Number(precio_unitario) < 0) {
                 return res.status(400).json({ ok: false, message: '"precio_unitario" debe ser un número positivo' });
             }
-            if (!pedido) return res.status(400).json({ ok: false, message: 'El campo "pedido" es requerido' });
-            if (!producto) return res.status(400).json({ ok: false, message: 'El campo "producto" es requerido' });
+            if (!pedido_id) return res.status(400).json({ ok: false, message: 'El campo "pedido_id" es requerido' });
+            if (!producto_id) return res.status(400).json({ ok: false, message: 'El campo "producto_id" es requerido' });
 
-            const nuevo = await DetallePedidoModel.create({ cantidad, precio_unitario, pedido, producto });
+            const nuevo = await DetallePedidoModel.create({ cantidad, precio_unitario, pedido_id, producto_id });
             res.status(201).json({ ok: true, data: nuevo });
         } catch (error) {
             console.error('Error al crear detalle del pedido:', error);
@@ -51,7 +53,9 @@ const DetallePedidoController = {
     async update(req, res) {
         try {
             const { id } = req.params;
-            const { cantidad, precio_unitario, pedido, producto } = req.body;
+            const { cantidad, precio_unitario } = req.body;
+            const pedido_id = req.body.pedido_id ?? req.body.pedido;
+            const producto_id = req.body.producto_id ?? req.body.producto;
             if (!cantidad || cantidad <= 0) {
                 return res.status(400).json({ ok: false, message: 'El campo "cantidad" debe ser mayor a 0' });
             }
@@ -61,7 +65,10 @@ const DetallePedidoController = {
             if (isNaN(precio_unitario) || Number(precio_unitario) < 0) {
                 return res.status(400).json({ ok: false, message: '"precio_unitario" debe ser un número positivo' });
             }
-            const actualizado = await DetallePedidoModel.update(id, { cantidad, precio_unitario, pedido, producto });
+            if (!pedido_id) return res.status(400).json({ ok: false, message: 'El campo "pedido_id" es requerido' });
+            if (!producto_id) return res.status(400).json({ ok: false, message: 'El campo "producto_id" es requerido' });
+
+            const actualizado = await DetallePedidoModel.update(id, { cantidad, precio_unitario, pedido_id, producto_id });
             if (!actualizado) {
                 return res.status(404).json({ ok: false, message: 'Detalle del pedido no encontrado' });
             }
