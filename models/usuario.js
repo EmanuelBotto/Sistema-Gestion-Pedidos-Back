@@ -19,6 +19,14 @@ export const getUsuarios = async () => {
     return resultado.rows;
 };
 
+export const getUsuarioByNombre = async (nombre) => {
+    const resultado = await pool.query(
+        "SELECT * FROM usuario WHERE LOWER(nombre) = LOWER($1) LIMIT 1",
+        [nombre]
+    );
+    return resultado.rows[0];
+};
+
 // Obtener por ID
 export const getUsuarioById = async (id) => {
     const resultado = await pool.query(
